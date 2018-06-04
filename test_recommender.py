@@ -3,7 +3,7 @@ import recommender
 
 class TestRecommender(unittest.TestCase):
     
-    train_dir = '/Users/duthiee/data/gluon_recommender/train'
+    train_dir = '/Users/duthiee/data/gluon_recommender/train_in'
     train_dir_ready = '/Users/duthiee/data/gluon_recommender/train_ready'
 
     def test_prepare_train_data(self):
