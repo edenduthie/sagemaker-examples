@@ -2,6 +2,8 @@ import os
 import pandas as pd
 import numpy as np
 from sklearn.model_selection import GroupKFold
+import boto3
+import shutil
 
 def load_df(training_dir,nrows=None):
     f = os.listdir(training_dir)
@@ -75,5 +77,44 @@ def prepare_data(train_in_dir,train_out_dir,test_out_dir,n_splits=5,nrows=None):
         filename = os.path.join(train_out_dir,'{}_videos_train.csv'.format(index))
         partition.to_csv(filename,index=False)
         index += 1
+        
+def upload_to_s3(source_dir,bucket,prefix):
+    f = os.listdir(source_dir)
+    client = boto3.client('s3')
+    for filename in f:
+        head,tail=os.path.split(filename)
+        key = '{}/{}'.format(prefix,tail)
+        client.upload_file(os.path.join(source_dir,filename), bucket, key)
+        
+def full_process(train_in_dir,train_out_dir,test_out_dir,bucket,train_prefix,text_prefix,
+    n_splits=5,nrows=None):
+    
+    prepare_data(train_in_dir,train_out_dir,test_out_dir,n_splits,nrows)
+    upload_to_s3(train_out_dir,bucket,train_prefix)
+    upload_to_s3(test_out_dir,bucket,test_prefix)
+    
+def clear_dir(self,path):
+    for root, dirs, files in os.walk(path):
+        for f in files:
+            os.unlink(os.path.join(root, f))
+        for d in dirs:
+            shutil.rmtree(os.path.join(root, d))
+    
+if __name__ == '__main__':
+    
+    bucket = 'eduthie-sagemaker-1'
+    prefix = 'gluon_recommender'
+    train_in_dir = '/Users/duthiee/data/gluon_recommender/train_in'
+    train_out_dir = '/Users/duthiee/data/gluon_recommender/train_out'
+    test_out_dir = '/Users/duthiee/data/gluon_recommender/test_out'
+    
+    train_prefix = '{}/{}'.format(prefix,'train_dist')
+    test_prefix = '{}/{}'.format(prefix,'test_dist')
+    
+    full_process(train_in_dir,train_out_dir,test_out_dir,bucket,train_prefix,test_prefix,
+        n_splits=5)
+    
+    clear_dir(train_out_dir)
+    clear_dir(test_out_dir)
         
         
