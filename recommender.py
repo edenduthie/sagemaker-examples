@@ -169,7 +169,7 @@ class SparseMatrixDataset(gluon.data.Dataset):
         return self.data.shape[0]        
 
     
-def prepare_train_data(training_dir,nrows=None):
+def prepare_train_data(training_dir,nrows=None,csv=False):
     f = os.listdir(training_dir)
     df = pd.read_csv(os.path.join(training_dir, f[0]), delimiter='\t', error_bad_lines=False, nrows=nrows)
     df = df[['customer_id', 'product_id', 'star_rating']]
