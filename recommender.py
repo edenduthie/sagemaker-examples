@@ -177,8 +177,8 @@ def prepare_train_data(training_dir,nrows=None,csv=False):
     products = df['product_id'].value_counts()
     
     # Filter long-tail
-#    customers = customers[customers >= 5]
-#    products = products[products >= 10]
+    customers = customers[customers >= 5]
+    products = products[products >= 10]
 
     reduced_df = df.merge(pd.DataFrame({'customer_id': customers.index})).merge(pd.DataFrame({'product_id': products.index}))
     customers = reduced_df['customer_id'].value_counts()
