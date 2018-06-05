@@ -93,7 +93,7 @@ def full_process(train_in_dir,train_out_dir,test_out_dir,bucket,train_prefix,tex
     upload_to_s3(train_out_dir,bucket,train_prefix)
     upload_to_s3(test_out_dir,bucket,test_prefix)
     
-def clear_dir(self,path):
+def clear_dir(path):
     for root, dirs, files in os.walk(path):
         for f in files:
             os.unlink(os.path.join(root, f))

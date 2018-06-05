@@ -177,8 +177,8 @@ def prepare_train_data(training_dir,nrows=None,csv=False):
     products = df['product_id'].value_counts()
     
     # Filter long-tail
-    customers = customers[customers >= 5]
-    products = products[products >= 10]
+#    customers = customers[customers >= 5]
+#    products = products[products >= 10]
 
     reduced_df = df.merge(pd.DataFrame({'customer_id': customers.index})).merge(pd.DataFrame({'product_id': products.index}))
     customers = reduced_df['customer_id'].value_counts()
@@ -191,13 +191,20 @@ def prepare_train_data(training_dir,nrows=None,csv=False):
     reduced_df = reduced_df.merge(customer_index).merge(product_index)
 
     # Split train and test
-    test_df = reduced_df.groupby('customer_id').last().reset_index()
-
-    train_df = reduced_df.merge(test_df[['customer_id', 'product_id']], 
-                                on=['customer_id', 'product_id'], 
-                                how='outer', 
-                                indicator=True)
-    train_df = train_df[(train_df['_merge'] == 'left_only')]
+#    test_df = reduced_df.groupby('customer_id').last().reset_index()
+#
+#    train_df = reduced_df.merge(test_df[['customer_id', 'product_id']], 
+#                                on=['customer_id', 'product_id'], 
+#                                how='outer', 
+#                                indicator=True)
+#    train_df = train_df[(train_df['_merge'] == 'left_only')]
+    
+    customer_ids = customer_index.user.as_matrix()
+    num_test = int(len(customer_ids)*0.1)
+    test_i = np.random.choice(customer_ids,num_test,replace=False)
+    train_i = np.setdiff1d(customer_ids,test_i)
+    test_df = reduced_df.loc[reduced_df.user.isin(test_i)]
+    train_df = reduced_df.loc[reduced_df.user.isin(train_i)]
 
     # MXNet data iterators
     train_iter = gluon.data.DataLoader(SparseMatrixDataset(nd.array(train_df[['user', 'item']].values, dtype=np.float32), 
